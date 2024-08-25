@@ -4,8 +4,8 @@ run:
 
 # compose up
 # Host: mysql
-# Username: devuser
-# Password: devpassword
+# Username: myuser
+# Password: mypassword
 # Database: course_management
 compose-up:
 	docker-compose up -d
