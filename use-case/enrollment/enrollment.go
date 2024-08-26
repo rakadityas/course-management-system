@@ -144,7 +144,7 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 	// Prepare the response
 	var response ListClassmatesResp
 	for courseID, studentIDs := range mapCourseGroup {
-		course, err := enrollmentUC.courseService.GetCourseByID(ctx, courseID)
+		course, err := enrollmentUC.courseService.GetCourseByID(ctx, courseID) // todo: improve this with get bulk
 		if err != nil {
 			return ListClassmatesResp{Status: "error", Message: "failed to retrieve course data"}, err
 		}
@@ -158,9 +158,9 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 				continue // Skip the current student
 			}
 
-			student, err := enrollmentUC.studentService.GetStudentByID(ctx, id)
+			student, err := enrollmentUC.studentService.GetStudentByID(ctx, id) // todo: improve this with get bulk
 			if err != nil {
-				return ListClassmatesResp{Status: "error", Message: "failed to retrieve student data"}, err
+				return ListClassmatesResp{Status: "error", Message: "failed to retrieve student data: " + strconv.FormatInt(id, 10)}, err
 			}
 			if student == nil {
 				return ListClassmatesResp{Status: "error", Message: "student data is not found for studentID: " + strconv.FormatInt(id, 10)}, nil

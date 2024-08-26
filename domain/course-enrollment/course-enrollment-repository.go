@@ -49,11 +49,7 @@ func (repo *CourseEnrollmentDB) CreateEnrollment(ctx context.Context, courseEnro
 
 // GetEnrollmentByStudentID retrieves all course enrollments for a given student.
 func (repo *CourseEnrollmentDB) GetEnrollmentByStudentID(ctx context.Context, studentID int64) ([]CourseEnrollment, error) {
-	query := `
-		SELECT id, student_id, course_id, status, create_time, update_time
-		FROM course_enrollments
-		WHERE student_id = ? and status = 1
-	`
+	query := "SELECT id, student_id, course_id, status, create_time, update_time FROM course_enrollments WHERE student_id = ? and status = 1"
 	rows, err := repo.DB.QueryContext(ctx, query, studentID)
 	if err != nil {
 		return nil, err
