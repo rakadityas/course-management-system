@@ -2,6 +2,7 @@ package enrollmentusecase
 
 import (
 	"context"
+	common "github/rakadityas/course-management-system/common"
 	courseDomain "github/rakadityas/course-management-system/domain/course"
 	courseEnrollmentDomain "github/rakadityas/course-management-system/domain/course-enrollment"
 	studentDomain "github/rakadityas/course-management-system/domain/student"
@@ -35,39 +36,39 @@ func (enrollmentUC *EnrollmentUseCase) CourseSignUp(ctx context.Context, req Cou
 	// Ensure the student data exists
 	studentData, err := enrollmentUC.studentService.GetStudentByID(ctx, req.StudentID)
 	if err != nil {
-		return CourseSignUpResp{Status: "error", Message: "failed to retrieve student data"}, err
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "failed to retrieve student data"}, err
 	}
 	if studentData == nil {
-		return CourseSignUpResp{Status: "error", Message: "student data not found"}, nil
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "student data not found"}, nil
 	}
 
 	// Ensure the course data exists
 	courseData, err := enrollmentUC.courseService.GetCourseByID(ctx, req.CourseID)
 	if err != nil {
-		return CourseSignUpResp{Status: "error", Message: "failed to retrieve course data"}, err
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "failed to retrieve course data"}, err
 	}
 	if courseData == nil {
-		return CourseSignUpResp{Status: "error", Message: "course data not found"}, nil
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "course data not found"}, nil
 	}
 
 	// Ensure the student never made any enrollment at all
 	courseEnrollments, err := enrollmentUC.courseEnrollmentService.GetEnrollmentByStudentIDAndCourseID(ctx, req.StudentID, req.CourseID)
 	if err != nil {
-		return CourseSignUpResp{Status: "error", Message: "failed to retrieve course data"}, err
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "failed to retrieve course data"}, err
 	}
 	if len(courseEnrollments) > 0 {
-		return CourseSignUpResp{Status: "error", Message: "student has enrolled before"}, err
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "student has enrolled before"}, err
 	}
 
 	// Create new enrollment
 	newEnrollment, err := enrollmentUC.courseEnrollmentService.CreateEnrollment(ctx, req.StudentID, req.CourseID, courseEnrollmentDomain.StatusActive)
 	if err != nil {
-		return CourseSignUpResp{Status: "error", Message: "failed to sign up course"}, err
+		return CourseSignUpResp{Status: common.StatusFailure, Message: "failed to sign up course"}, err
 	}
 
 	// Return a successful response
 	return CourseSignUpResp{
-		Status: "success",
+		Status: common.StatusSuccess,
 		EnrollmentData: &CourseEnrollment{
 			ID:           newEnrollment.ID,
 			StudentID:    newEnrollment.StudentID,
@@ -86,7 +87,7 @@ func (enrollmentUC *EnrollmentUseCase) ListCourses(ctx context.Context, studentI
 	// Get course enrollments for the student
 	enrollments, err := enrollmentUC.courseEnrollmentService.GetEnrollmentByStudentID(ctx, studentID)
 	if err != nil {
-		return ListCoursesResp{Status: "error", Message: "failed to retrieve enrollments"}, err
+		return ListCoursesResp{Status: common.StatusFailure, Message: "failed to retrieve enrollments"}, err
 	}
 
 	// Prepare the response
@@ -94,10 +95,10 @@ func (enrollmentUC *EnrollmentUseCase) ListCourses(ctx context.Context, studentI
 	for _, enrollment := range enrollments {
 		course, err := enrollmentUC.courseService.GetCourseByID(ctx, enrollment.CourseID)
 		if err != nil {
-			return ListCoursesResp{Status: "error", Message: "failed to retrieve course data"}, err
+			return ListCoursesResp{Status: common.StatusFailure, Message: "failed to retrieve course data"}, err
 		}
 		if course == nil {
-			return ListCoursesResp{Status: "error", Message: "course data is not found for courseID: " + strconv.FormatInt(enrollment.CourseID, 10)}, nil
+			return ListCoursesResp{Status: common.StatusFailure, Message: "course data is not found for courseID: " + strconv.FormatInt(enrollment.CourseID, 10)}, nil
 		}
 
 		courses = append(courses, CourseDetail{
@@ -110,7 +111,7 @@ func (enrollmentUC *EnrollmentUseCase) ListCourses(ctx context.Context, studentI
 	}
 
 	return ListCoursesResp{
-		Status:  "success",
+		Status:  common.StatusSuccess,
 		Courses: courses,
 	}, nil
 }
@@ -119,11 +120,11 @@ func (enrollmentUC *EnrollmentUseCase) ListCourses(ctx context.Context, studentI
 func (enrollmentUC *EnrollmentUseCase) CancelCourse(ctx context.Context, studentID, courseID int64) (CancelCourseResp, error) {
 	err := enrollmentUC.courseEnrollmentService.UpdateCourseEnrollmentStatus(ctx, studentID, courseID, courseEnrollmentDomain.StatusCancelled)
 	if err != nil {
-		return CancelCourseResp{Status: "error", Message: "failed to cancel course enrollment"}, err
+		return CancelCourseResp{Status: common.StatusFailure, Message: "failed to cancel course enrollment"}, err
 	}
 
 	return CancelCourseResp{
-		Status: "success",
+		Status: common.StatusSuccess,
 	}, nil
 }
 
@@ -132,7 +133,7 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 	// Get course enrollments for the student
 	enrollments, err := enrollmentUC.courseEnrollmentService.GetListClassmates(ctx, studentID)
 	if err != nil {
-		return ListClassmatesResp{Status: "error", Message: "failed to get list of classmates"}, err
+		return ListClassmatesResp{Status: common.StatusFailure, Message: "failed to get list of classmates"}, err
 	}
 
 	// Create a map to group students by course ID
@@ -146,10 +147,10 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 	for courseID, studentIDs := range mapCourseGroup {
 		course, err := enrollmentUC.courseService.GetCourseByID(ctx, courseID) // todo: improve this with get bulk
 		if err != nil {
-			return ListClassmatesResp{Status: "error", Message: "failed to retrieve course data"}, err
+			return ListClassmatesResp{Status: common.StatusFailure, Message: "failed to retrieve course data"}, err
 		}
 		if course == nil {
-			return ListClassmatesResp{Status: "error", Message: "course data is not found for courseID: " + strconv.FormatInt(courseID, 10)}, nil
+			return ListClassmatesResp{Status: common.StatusFailure, Message: "course data is not found for courseID: " + strconv.FormatInt(courseID, 10)}, nil
 		}
 
 		var classmates []ListClassmatesStudentsResp
@@ -160,10 +161,10 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 
 			student, err := enrollmentUC.studentService.GetStudentByID(ctx, id) // todo: improve this with get bulk
 			if err != nil {
-				return ListClassmatesResp{Status: "error", Message: "failed to retrieve student data: " + strconv.FormatInt(id, 10)}, err
+				return ListClassmatesResp{Status: common.StatusFailure, Message: "failed to retrieve student data: " + strconv.FormatInt(id, 10)}, err
 			}
 			if student == nil {
-				return ListClassmatesResp{Status: "error", Message: "student data is not found for studentID: " + strconv.FormatInt(id, 10)}, nil
+				return ListClassmatesResp{Status: common.StatusFailure, Message: "student data is not found for studentID: " + strconv.FormatInt(id, 10)}, nil
 			}
 
 			classmates = append(classmates, ListClassmatesStudentsResp{
@@ -180,7 +181,7 @@ func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, stude
 	}
 
 	return ListClassmatesResp{
-		Status:  "success",
+		Status:  common.StatusSuccess,
 		Courses: response.Courses,
 	}, nil
 }

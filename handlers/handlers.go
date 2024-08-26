@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
+	common "github/rakadityas/course-management-system/common"
 	enrollmentUseCase "github/rakadityas/course-management-system/use-case/enrollment"
 )
 
@@ -28,20 +28,20 @@ func (h *Handler) CourseSignUpHandler() http.HandlerFunc {
 
 		var requestPayload enrollmentUseCase.CourseSignUpRequest
 		if err := json.NewDecoder(r.Body).Decode(&requestPayload); err != nil {
-			log.Print(err)
-			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid request payload"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 		if requestPayload.StudentID == 0 || requestPayload.CourseID == 0 {
-			log.Print("Request data is empty")
-			http.Error(w, "Request Data is empty", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Request Data is empty"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 
 		resp, err := h.EnrollmentUseCase.CourseSignUp(ctx, requestPayload)
 		if err != nil {
-			log.Print(err)
-			http.Error(w, resp.Message, http.StatusInternalServerError)
+			respByte, _ := json.Marshal(resp)
+			http.Error(w, string(respByte), http.StatusInternalServerError)
 			return
 		}
 
@@ -59,20 +59,20 @@ func (h *Handler) ListCoursesHandler() http.HandlerFunc {
 		studentIDParam := r.URL.Query().Get("student_id")
 		studentID, err := strconv.ParseInt(studentIDParam, 10, 64)
 		if err != nil {
-			log.Print(err)
-			http.Error(w, "Invalid student ID", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid student ID"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 		if studentID == 0 {
-			log.Print(err)
-			http.Error(w, "Student ID Zero", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Student ID Zero"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 
 		resp, err := h.EnrollmentUseCase.ListCourses(ctx, studentID)
 		if err != nil {
-			log.Print(err)
-			http.Error(w, resp.Message, http.StatusInternalServerError)
+			respByte, _ := json.Marshal(resp)
+			http.Error(w, string(respByte), http.StatusInternalServerError)
 			return
 		}
 
@@ -89,17 +89,20 @@ func (h *Handler) CancelCourseHandler() http.HandlerFunc {
 
 		var requestPayload enrollmentUseCase.CancelCourseRequest
 		if err := json.NewDecoder(r.Body).Decode(&requestPayload); err != nil {
-			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid request payload"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 		if requestPayload.CourseID == 0 || requestPayload.StudentID == 0 {
-			http.Error(w, "Invalid request payload (empty)", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid request payload (empty)"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 
 		resp, err := h.EnrollmentUseCase.CancelCourse(ctx, requestPayload.StudentID, requestPayload.CourseID)
 		if err != nil {
-			http.Error(w, resp.Message, http.StatusInternalServerError)
+			statusResp, _ := json.Marshal(resp)
+			http.Error(w, string(statusResp), http.StatusInternalServerError)
 			return
 		}
 
@@ -116,23 +119,27 @@ func (h *Handler) ListClassmatesHandler() http.HandlerFunc {
 
 		studentIDStr := r.URL.Query().Get("student_id")
 		if studentIDStr == "" {
-			http.Error(w, "student_id is required", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "student_id is required"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 
 		studentID, err := strconv.ParseInt(studentIDStr, 10, 64)
 		if err != nil {
-			http.Error(w, "Invalid student_id", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid student_id"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 		if studentID == 0 {
-			http.Error(w, "Invalid request payload (empty)", http.StatusBadRequest)
+			statusByte, _ := json.Marshal(HandlerStatus{Status: common.StatusFailure, Message: "Invalid request payload (empty)"})
+			http.Error(w, string(statusByte), http.StatusBadRequest)
 			return
 		}
 
 		resp, err := h.EnrollmentUseCase.ListClassmates(ctx, studentID)
 		if err != nil {
-			http.Error(w, resp.Message, http.StatusInternalServerError)
+			respByte, _ := json.Marshal(resp)
+			http.Error(w, string(respByte), http.StatusInternalServerError)
 			return
 		}
 

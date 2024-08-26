@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github/rakadityas/course-management-system/common"
 	enrollmentUseCase "github/rakadityas/course-management-system/use-case/enrollment"
 	enrollmentUseCaseMock "github/rakadityas/course-management-system/use-case/enrollment/mocks"
 	"net/http"
@@ -45,7 +46,7 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().CourseSignUp(gomock.Any(), enrollmentUseCase.CourseSignUpRequest{StudentID: studentID, CourseID: courseID}).Return(enrollmentUseCase.CourseSignUpResp{
-						Status: "success",
+						Status: common.StatusSuccess,
 						EnrollmentData: &enrollmentUseCase.CourseEnrollment{
 							ID:           1,
 							StudentID:    studentID,
@@ -75,7 +76,7 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Request Data is empty\n",
+			wantBody:       `{"status":"failure","message":"Request Data is empty"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -95,21 +96,15 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 				t.Errorf("Status code = %v, want %v", rec.Code, tt.wantStatusCode)
 			}
 
-			if rec.Code == http.StatusOK {
-				var gotBody, wantBody map[string]interface{}
-				if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
-					t.Fatalf("Failed to unmarshal response body: %v", err)
-				}
-				if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
-					t.Fatalf("Failed to unmarshal expected body: %v", err)
-				}
-				if !reflect.DeepEqual(gotBody, wantBody) {
-					t.Errorf("Response body = %v, want %v", gotBody, wantBody)
-				}
-			} else {
-				if rec.Body.String() != tt.wantBody {
-					t.Errorf("Response body = %v, want %v", rec.Body.String(), tt.wantBody)
-				}
+			var gotBody, wantBody map[string]interface{}
+			if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+				t.Fatalf("Failed to unmarshal response body: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+				t.Fatalf("Failed to unmarshal expected body: %v", err)
+			}
+			if !reflect.DeepEqual(gotBody, wantBody) {
+				t.Errorf("Response body = %v, want %v", gotBody, wantBody)
 			}
 		})
 	}
@@ -138,14 +133,14 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().ListCourses(gomock.Any(), studentID).Return(enrollmentUseCase.ListCoursesResp{
-						Status: "success",
+						Status: common.StatusSuccess,
 						Courses: []enrollmentUseCase.CourseDetail{
 							{
 								CourseID:   101,
 								CourseName: "Course A",
 								Status:     1,
-								CreateTime: time.Time{}, // Use a fixed time or time.Now() in actual tests
-								UpdateTime: time.Time{}, // Use a fixed time or time.Now() in actual tests
+								CreateTime: time.Time{},
+								UpdateTime: time.Time{},
 							},
 						},
 					}, nil)
@@ -167,7 +162,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				"student_id": "invalid",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Invalid student ID\n",
+			wantBody:       `{"status":"failure","message":"Invalid student ID"}`,
 		},
 		{
 			name: "Zero Student ID",
@@ -178,7 +173,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				"student_id": "0",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Student ID Zero\n",
+			wantBody:       `{"status":"failure","message":"Student ID Zero"}`,
 		},
 		{
 			name: "Error From UseCase",
@@ -186,7 +181,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().ListCourses(gomock.Any(), studentID).Return(enrollmentUseCase.ListCoursesResp{
-						Status:  "error",
+						Status:  common.StatusFailure,
 						Message: "failed to retrieve courses",
 					}, errors.New("some error"))
 					return mockEnrollmentUC
@@ -196,7 +191,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				"student_id": strconv.FormatInt(studentID, 10),
 			},
 			wantStatusCode: http.StatusInternalServerError,
-			wantBody:       "failed to retrieve courses\n",
+			wantBody:       `{"status":"failure","message":"failed to retrieve courses"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -220,21 +215,15 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				t.Errorf("Status code = %v, want %v", rec.Code, tt.wantStatusCode)
 			}
 
-			if rec.Code == http.StatusOK {
-				var gotBody, wantBody map[string]interface{}
-				if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
-					t.Fatalf("Failed to unmarshal response body: %v", err)
-				}
-				if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
-					t.Fatalf("Failed to unmarshal expected body: %v", err)
-				}
-				if !reflect.DeepEqual(gotBody, wantBody) {
-					t.Errorf("Response body = %v, want %v", gotBody, wantBody)
-				}
-			} else {
-				if rec.Body.String() != tt.wantBody {
-					t.Errorf("Response body = %v, want %v", rec.Body.String(), tt.wantBody)
-				}
+			var gotBody, wantBody map[string]interface{}
+			if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+				t.Fatalf("Failed to unmarshal response body: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+				t.Fatalf("Failed to unmarshal expected body: %v", err)
+			}
+			if !reflect.DeepEqual(gotBody, wantBody) {
+				t.Errorf("Response body = %v, want %v", gotBody, wantBody)
 			}
 		})
 	}
@@ -266,7 +255,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().CancelCourse(gomock.Any(), studentID, courseID).Return(enrollmentUseCase.CancelCourseResp{
-						Status: "success",
+						Status: common.StatusSuccess,
 					}, nil)
 					return mockEnrollmentUC
 				}(),
@@ -288,7 +277,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Invalid request payload (empty)\n",
+			wantBody:       `{"status":"failure","message":"Invalid request payload (empty)"}`,
 		},
 		{
 			name: "Error From UseCase",
@@ -296,7 +285,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().CancelCourse(gomock.Any(), studentID, courseID).Return(enrollmentUseCase.CancelCourseResp{
-						Status:  "error",
+						Status:  common.StatusFailure,
 						Message: "failed to cancel course",
 					}, errors.New("some error"))
 					return mockEnrollmentUC
@@ -307,7 +296,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusInternalServerError,
-			wantBody:       "failed to cancel course\n",
+			wantBody:       `{"status":"failure","message":"failed to cancel course"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -327,21 +316,15 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				t.Errorf("Status code = %v, want %v", rec.Code, tt.wantStatusCode)
 			}
 
-			if rec.Code == http.StatusOK {
-				var gotBody, wantBody map[string]interface{}
-				if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
-					t.Fatalf("Failed to unmarshal response body: %v", err)
-				}
-				if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
-					t.Fatalf("Failed to unmarshal expected body: %v", err)
-				}
-				if !reflect.DeepEqual(gotBody, wantBody) {
-					t.Errorf("Response body = %v, want %v", gotBody, wantBody)
-				}
-			} else {
-				if rec.Body.String() != tt.wantBody {
-					t.Errorf("Response body = %v, want %v", rec.Body.String(), tt.wantBody)
-				}
+			var gotBody, wantBody map[string]interface{}
+			if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+				t.Fatalf("Failed to unmarshal response body: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+				t.Fatalf("Failed to unmarshal expected body: %v", err)
+			}
+			if !reflect.DeepEqual(gotBody, wantBody) {
+				t.Errorf("Response body = %v, want %v", gotBody, wantBody)
 			}
 		})
 	}
@@ -372,7 +355,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().ListClassmates(gomock.Any(), studentID).Return(enrollmentUseCase.ListClassmatesResp{
-						Status: "success",
+						Status: common.StatusSuccess,
 						Courses: []enrollmentUseCase.ListClassmatesCourseResp{
 							{
 								CourseID:   101,
@@ -418,7 +401,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 			},
 			queryParams:    map[string]string{},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "student_id is required\n",
+			wantBody:       `{"status":"failure","message":"student_id is required"}`,
 		},
 		{
 			name: "Invalid student_id",
@@ -429,7 +412,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": "invalid",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Invalid student_id\n",
+			wantBody:       `{"status":"failure","message":"Invalid student_id"}`,
 		},
 		{
 			name: "Student ID Zero",
@@ -440,7 +423,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": "0",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       "Invalid request payload (empty)\n",
+			wantBody:       `{"status":"failure","message":"Invalid request payload (empty)"}`,
 		},
 		{
 			name: "Error from UseCase",
@@ -448,7 +431,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				EnrollmentUseCase: func() enrollmentUseCase.EnrollmentUseCaseItf {
 					mockEnrollmentUC := enrollmentUseCaseMock.NewMockEnrollmentUseCaseItf(ctrl)
 					mockEnrollmentUC.EXPECT().ListClassmates(gomock.Any(), studentID).Return(enrollmentUseCase.ListClassmatesResp{
-						Status:  "error",
+						Status:  common.StatusFailure,
 						Message: "failed to list classmates",
 					}, errors.New("some error"))
 					return mockEnrollmentUC
@@ -458,7 +441,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": strconv.FormatInt(studentID, 10),
 			},
 			wantStatusCode: http.StatusInternalServerError,
-			wantBody:       "failed to list classmates\n",
+			wantBody:       `{"status":"failure","message":"failed to list classmates","courses": null}`,
 		},
 	}
 
@@ -484,21 +467,15 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				t.Errorf("Status code = %v, want %v", rec.Code, tt.wantStatusCode)
 			}
 
-			if rec.Code == http.StatusOK {
-				var gotBody, wantBody map[string]interface{}
-				if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
-					t.Fatalf("Failed to unmarshal response body: %v", err)
-				}
-				if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
-					t.Fatalf("Failed to unmarshal expected body: %v", err)
-				}
-				if !reflect.DeepEqual(gotBody, wantBody) {
-					t.Errorf("Response body = %v, want %v", gotBody, wantBody)
-				}
-			} else {
-				if rec.Body.String() != tt.wantBody {
-					t.Errorf("Response body = %v, want %v", rec.Body.String(), tt.wantBody)
-				}
+			var gotBody, wantBody map[string]interface{}
+			if err := json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+				t.Fatalf("Failed to unmarshal response body: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+				t.Fatalf("Failed to unmarshal expected body: %v", err)
+			}
+			if !reflect.DeepEqual(gotBody, wantBody) {
+				t.Errorf("Response body = %v, want %v", gotBody, wantBody)
 			}
 		})
 	}

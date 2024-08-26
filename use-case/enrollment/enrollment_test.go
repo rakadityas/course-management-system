@@ -3,6 +3,7 @@ package enrollmentusecase
 import (
 	"context"
 	"errors"
+	common "github/rakadityas/course-management-system/common"
 	courseDomain "github/rakadityas/course-management-system/domain/course"
 	courseEnrollmentDomain "github/rakadityas/course-management-system/domain/course-enrollment"
 	courseEnrollmentDomainMock "github/rakadityas/course-management-system/domain/course-enrollment/mocks"
@@ -79,7 +80,7 @@ func TestEnrollmentUseCase_CourseSignUp(t *testing.T) {
 				},
 			},
 			want: CourseSignUpResp{
-				Status: "success",
+				Status: common.StatusSuccess,
 				EnrollmentData: &CourseEnrollment{
 					ID:           1,
 					StudentID:    studentID,
@@ -116,7 +117,7 @@ func TestEnrollmentUseCase_CourseSignUp(t *testing.T) {
 				},
 			},
 			want: CourseSignUpResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "student data not found",
 			},
 			wantErr: false,
@@ -146,7 +147,7 @@ func TestEnrollmentUseCase_CourseSignUp(t *testing.T) {
 				},
 			},
 			want: CourseSignUpResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "course data not found",
 			},
 			wantErr: false,
@@ -180,7 +181,7 @@ func TestEnrollmentUseCase_CourseSignUp(t *testing.T) {
 				},
 			},
 			want: CourseSignUpResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "student has enrolled before",
 			},
 			wantErr: false,
@@ -213,7 +214,7 @@ func TestEnrollmentUseCase_CourseSignUp(t *testing.T) {
 				},
 			},
 			want: CourseSignUpResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to sign up course",
 			},
 			wantErr: true,
@@ -289,7 +290,7 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListCoursesResp{
-				Status: "success",
+				Status: common.StatusSuccess,
 				Courses: []CourseDetail{
 					{
 						CourseID:   int64(101),
@@ -319,7 +320,7 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListCoursesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to retrieve enrollments",
 			},
 			wantErr: true,
@@ -352,7 +353,7 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListCoursesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to retrieve course data",
 			},
 			wantErr: true,
@@ -385,7 +386,7 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListCoursesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "course data is not found for courseID: 101",
 			},
 			wantErr: false,
@@ -456,7 +457,7 @@ func TestEnrollmentUseCase_CancelCourse(t *testing.T) {
 				courseID:  courseID,
 			},
 			want: CancelCourseResp{
-				Status: "success",
+				Status: common.StatusSuccess,
 			},
 			wantErr: false,
 		},
@@ -481,7 +482,7 @@ func TestEnrollmentUseCase_CancelCourse(t *testing.T) {
 				courseID:  courseID,
 			},
 			want: CancelCourseResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to cancel course enrollment",
 			},
 			wantErr: true,
@@ -557,7 +558,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListClassmatesResp{
-				Status: "success",
+				Status: common.StatusSuccess,
 				Courses: []ListClassmatesCourseResp{
 					{
 						CourseID:   101,
@@ -591,7 +592,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListClassmatesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to get list of classmates",
 			},
 			wantErr: true,
@@ -620,7 +621,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListClassmatesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to retrieve course data",
 			},
 			wantErr: true,
@@ -651,7 +652,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				studentID: studentID,
 			},
 			want: ListClassmatesResp{
-				Status:  "error",
+				Status:  common.StatusFailure,
 				Message: "failed to retrieve student data: 2",
 			},
 			wantErr: true,

@@ -93,6 +93,7 @@ type CourseEnrollment struct {
 
 ### 1. Sign Up for a Course
 **Endpoint:** `POST /signup`
+
 **Description:** Enroll a student in a course.
 
 **Request Payload:**
@@ -105,7 +106,9 @@ type CourseEnrollment struct {
 - student_id (int64): ID of the student.
 - course_id (int64): ID of the course.
 
+
 **Response:**
+
 Success response
 ```
 {
@@ -124,22 +127,49 @@ Success response
 }
 ```
 
-Failed response
+Failed response: request empty
 ```
 {
-  "status": "error",
-  "message": "Invalid request payload"
+  "status": "failure",
+  "message": "Request Data is empty"
+}
+```
+
+Failed response: student not found
+```
+{
+  "status": "failure",
+  "message": "student data not found"
+}
+```
+
+Failed response: course not found
+```
+{
+  "status": "failure",
+  "message": "course data not found"
+}
+```
+
+Failed response: student has enrolled before
+```
+{
+  "status": "failure",
+  "message": "student has enrolled before"
 }
 ```
 
 
 ### 2. List Courses for a Student
 **Endpoint:** `GET /courses`
+
 **Description:** Retrieve a list of courses for a specific student.
+
 **Query Parameters:**
 - student_id (int64): ID of the student.
 
 **Response:**
+
 Success response
 ```
 {
@@ -156,17 +186,35 @@ Success response
 }
 ```
 
-Failure
+Failure response: invalid student id
 ```
 {
-  "status": "error",
+  "status": "failure",
   "message": "Invalid student ID"
 }
 ```
 
+Failure response: Student ID Zero
+```
+{
+  "status": "failure",
+  "message": "Student ID Zero"
+}
+```
+
+Failure response: course data is not found
+```
+{
+  "status": "failure",
+  "message": "course data is not found for courseID: 10"
+}
+```
+
+
 
 ### 3. Cancel a Course Enrollment
 **Endpoint:** `POST /cancel`
+
 **Description:** Cancel a student's enrollment in a course.
 
 **Request Payload:**
@@ -180,42 +228,48 @@ Failure
 - course_id (int64): ID of the course.
 
 **Response:**
+
 Success response
 ```
 {
-  "status": "success",
-  "message": "Successfully canceled enrollment"
+  "status": "success"
 }
 ```
 
-Failure
+Failure response: Invalid Request Payload (empty)
 ```
 {
-  "status": "error",
-  "message": "Invalid request payload"
+  "status": "failure",
+  "message": "Invalid request payload (empty)"
 }
 ```
 
 ### 4. List Classmates
 **Endpoint:** `GET /classmates`
+
 **Description:** Get a list of classmates enrolled in the same courses as the given student.
+
 **Query Parameter:**
 - student_id (int64): ID of the student.
 
 **Response:**
 
-success
+success response:
 ```
 {
   "status": "success",
   "courses": [
     {
-      "course_id": 456,
-      "course_name": "Course Name",
+      "course_id": 101,
+      "course_name": "Course 101",
       "class_mates": [
         {
-          "student_id": "789",
-          "student_email": "classmate@example.com"
+          "student_id": "2",
+          "student_email": "student2@example.com"
+        },
+        {
+          "student_id": "3",
+          "student_email": "student3@example.com"
         }
       ]
     }
@@ -224,10 +278,44 @@ success
 
 ```
 
-Failure
+Failure response: Missing student_id
 ```
 {
-  "status": "error",
+  "status": "failure",
+  "message": "student_id is required"
+}
+```
+
+
+Failure response: Invalid student_id
+```
+{
+  "status": "failure",
   "message": "Invalid student_id"
+}
+```
+
+
+Failure response: Invalid request payload (empty)
+```
+{
+  "status": "failure",
+  "message": "Invalid request payload (empty)"
+}
+```
+
+Failure response: course data is not found
+```
+{
+  "status": "failure",
+  "message": "course data is not found for courseID: 10"
+}
+```
+
+Failure response: student data is not found
+```
+{
+  "status": "failure",
+  "message": "student data is not found for studentID: 10"
 }
 ```
