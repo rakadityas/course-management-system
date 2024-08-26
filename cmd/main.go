@@ -7,6 +7,7 @@ import (
 	courseenrollmentdomain "github/rakadityas/course-management-system/domain/course-enrollment"
 	studentdomain "github/rakadityas/course-management-system/domain/student"
 	"os"
+	"time"
 
 	handlers "github/rakadityas/course-management-system/handlers"
 	"github/rakadityas/course-management-system/routes"
@@ -29,6 +30,9 @@ func main() {
 	if appPort == "" {
 		log.Fatal("APP_PORT is not set")
 	}
+
+	// TODO: find more elegant way for solving racing issue during docker compose up due to DB not yet ready
+	time.Sleep(10 * time.Second)
 
 	// initialize database connection
 	db, err := sql.Open("mysql", databaseURL)
