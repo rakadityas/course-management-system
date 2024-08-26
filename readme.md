@@ -202,6 +202,14 @@ Failure response: Student ID Zero
 }
 ```
 
+Failed response: student not found
+```
+{
+  "status": "failure",
+  "message": "student data not found"
+}
+```
+
 Failure response: course data is not found
 ```
 {
@@ -301,6 +309,14 @@ Failure response: Invalid request payload (empty)
 {
   "status": "failure",
   "message": "Invalid request payload (empty)"
+}
+```
+
+Failed response: student not found
+```
+{
+  "status": "failure",
+  "message": "student data not found"
 }
 ```
 

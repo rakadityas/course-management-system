@@ -84,6 +84,15 @@ func (enrollmentUC *EnrollmentUseCase) CourseSignUp(ctx context.Context, req Cou
 
 // ListCourses retrieves the list of courses a student is enrolled in.
 func (enrollmentUC *EnrollmentUseCase) ListCourses(ctx context.Context, studentID int64) (ListCoursesResp, error) {
+	// Ensure the student data exists
+	studentData, err := enrollmentUC.studentService.GetStudentByID(ctx, studentID)
+	if err != nil {
+		return ListCoursesResp{Status: common.StatusFailure, Message: "failed to retrieve student data"}, err
+	}
+	if studentData == nil {
+		return ListCoursesResp{Status: common.StatusFailure, Message: "student data not found"}, nil
+	}
+
 	// Get course enrollments for the student
 	enrollments, err := enrollmentUC.courseEnrollmentService.GetEnrollmentByStudentID(ctx, studentID)
 	if err != nil {
@@ -130,6 +139,15 @@ func (enrollmentUC *EnrollmentUseCase) CancelCourse(ctx context.Context, student
 
 // ListClassmates retrieves the list of classmates for the given student.
 func (enrollmentUC *EnrollmentUseCase) ListClassmates(ctx context.Context, studentID int64) (ListClassmatesResp, error) {
+	// Ensure the student data exists
+	studentData, err := enrollmentUC.studentService.GetStudentByID(ctx, studentID)
+	if err != nil {
+		return ListClassmatesResp{Status: common.StatusFailure, Message: "failed to retrieve student data"}, err
+	}
+	if studentData == nil {
+		return ListClassmatesResp{Status: common.StatusFailure, Message: "student data not found"}, nil
+	}
+
 	// Get course enrollments for the student
 	enrollments, err := enrollmentUC.courseEnrollmentService.GetListClassmates(ctx, studentID)
 	if err != nil {

@@ -265,6 +265,11 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 		{
 			name: "Success",
 			fields: fields{
+				studentService: func() studentDomain.StudentDomainItf {
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), studentID).Return(&studentDomain.Student{ID: studentID, Email: "student@example.com"}, nil)
+					return mock
+				}(),
 				courseService: func() courseDomain.CourseDomainItf {
 					mock := courseDomainMock.NewMockCourseDomainItf(ctrl)
 					mock.EXPECT().GetCourseByID(gomock.Any(), int64(101)).Return(&courseDomain.Course{ID: int64(101), Name: "Course Name"}, nil)
@@ -306,6 +311,11 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 		{
 			name: "Failed to Retrieve Enrollments",
 			fields: fields{
+				studentService: func() studentDomain.StudentDomainItf {
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), studentID).Return(&studentDomain.Student{ID: studentID, Email: "student@example.com"}, nil)
+					return mock
+				}(),
 				courseEnrollmentService: func() courseEnrollmentDomain.CourseEnrollmentDomainItf {
 					mock := courseEnrollmentDomainMock.NewMockCourseEnrollmentDomainItf(ctrl)
 					mock.EXPECT().GetEnrollmentByStudentID(gomock.Any(), studentID).Return(nil, errors.New("enrollments error"))
@@ -328,6 +338,11 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 		{
 			name: "Failed to Retrieve Course Data",
 			fields: fields{
+				studentService: func() studentDomain.StudentDomainItf {
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), studentID).Return(&studentDomain.Student{ID: studentID, Email: "student@example.com"}, nil)
+					return mock
+				}(),
 				courseEnrollmentService: func() courseEnrollmentDomain.CourseEnrollmentDomainItf {
 					mock := courseEnrollmentDomainMock.NewMockCourseEnrollmentDomainItf(ctrl)
 					mock.EXPECT().GetEnrollmentByStudentID(gomock.Any(), studentID).Return([]courseEnrollmentDomain.CourseEnrollment{
@@ -361,6 +376,11 @@ func TestEnrollmentUseCase_ListCourses(t *testing.T) {
 		{
 			name: "Course Data Not Found",
 			fields: fields{
+				studentService: func() studentDomain.StudentDomainItf {
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), studentID).Return(&studentDomain.Student{ID: studentID, Email: "student@example.com"}, nil)
+					return mock
+				}(),
 				courseEnrollmentService: func() courseEnrollmentDomain.CourseEnrollmentDomainItf {
 					mock := courseEnrollmentDomainMock.NewMockCourseEnrollmentDomainItf(ctrl)
 					mock.EXPECT().GetEnrollmentByStudentID(gomock.Any(), studentID).Return([]courseEnrollmentDomain.CourseEnrollment{
@@ -548,6 +568,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				}(),
 				studentService: func() studentDomain.StudentDomainItf {
 					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), int64(1)).Return(&studentDomain.Student{ID: 1, Email: "student1@example.com"}, nil)
 					mock.EXPECT().GetStudentByID(gomock.Any(), int64(2)).Return(&studentDomain.Student{ID: 2, Email: "student2@example.com"}, nil)
 					mock.EXPECT().GetStudentByID(gomock.Any(), int64(3)).Return(&studentDomain.Student{ID: 3, Email: "student3@example.com"}, nil)
 					return mock
@@ -584,7 +605,9 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 					return courseDomainMock.NewMockCourseDomainItf(ctrl)
 				}(),
 				studentService: func() studentDomain.StudentDomainItf {
-					return studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), int64(1)).Return(&studentDomain.Student{ID: 1, Email: "student1@example.com"}, nil)
+					return mock
 				}(),
 			},
 			args: args{
@@ -613,7 +636,9 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 					return mock
 				}(),
 				studentService: func() studentDomain.StudentDomainItf {
-					return studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), int64(1)).Return(&studentDomain.Student{ID: 1, Email: "student1@example.com"}, nil)
+					return mock
 				}(),
 			},
 			args: args{
@@ -643,6 +668,7 @@ func TestEnrollmentUseCase_ListClassmates(t *testing.T) {
 				}(),
 				studentService: func() studentDomain.StudentDomainItf {
 					mock := studentDomainMock.NewMockStudentDomainItf(ctrl)
+					mock.EXPECT().GetStudentByID(gomock.Any(), int64(1)).Return(&studentDomain.Student{ID: 1, Email: "student1@example.com"}, nil)
 					mock.EXPECT().GetStudentByID(gomock.Any(), int64(2)).Return(nil, errors.New("student not found"))
 					return mock
 				}(),
