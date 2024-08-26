@@ -12,13 +12,15 @@ This project is structured based on Clean Architecture principles:
 
 - **`bin`**: Contains the compiled binary files.
 - **`cmd`**: Contains `main.go` file and entry point for the application.
-- **`config`**: Contains configuration code.
 - **`domain`**: Contains core entities such as students, courses, and course enrollment.
 - **`etc`**: Contains plain configuration files.
 - **`handlers`**: Contains API handlers.
 - **`routes`**: Contains API route definitions.
 - **`scripts`**: Contains DDL and DML scripts for database queries.
 - **`use-case`**: Contains core business logic and use cases combining one or more domains.
+- **`Dockerfile`**: Dockerfile configuration for the app.
+- **`docker-compose.yaml`**: configuration for the app and mysql database.
+
 
 ## Makefile Commands
 
@@ -39,12 +41,20 @@ make compose-up
 ```
 This command will:
 - Start the Docker containers defined in docker-compose.yml in detached mode.
-- Docker MySQL Configuration:
-    - Host: mysql
-    - Username: myuser
-    - Password: mypassword
-    - Database: course_management
 
+### Stop Docker Containers
+```
+make compose-down
+```
+This command will:
+- Stop the Docker containers defined in docker-compose.yml.
+
+### Building dockerfile
+```
+make compose-build:
+```
+This command will:
+- building the dockerfile
 
 ## Entities
 

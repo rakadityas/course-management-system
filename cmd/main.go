@@ -2,12 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"fmt"
-	"github/rakadityas/course-management-system/config"
 	coursedomain "github/rakadityas/course-management-system/domain/course"
 	courseenrollmentdomain "github/rakadityas/course-management-system/domain/course-enrollment"
 	studentdomain "github/rakadityas/course-management-system/domain/student"
+	"os"
 
 	handlers "github/rakadityas/course-management-system/handlers"
 	"github/rakadityas/course-management-system/routes"
@@ -19,18 +18,28 @@ import (
 )
 
 func main() {
+	// Get the database connection string from the environment
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		log.Fatal("DATABASE_URL is not set")
+	}
 
-	// initialize configuration
-	configurationPath := flag.String("configuration_path", "etc/development.json", "file configuration path")
-	flag.Parse()
-	configuration := config.NewConfiguration(*configurationPath)
+	// Get the app port string from the environment
+	appPort := os.Getenv("APP_PORT")
+	if appPort == "" {
+		log.Fatal("APP_PORT is not set")
+	}
 
 	// initialize database connection
-	db, err := sql.Open("mysql", configuration.GetConfiguration().Resource.PrimaryDatabase)
+	db, err := sql.Open("mysql", databaseURL)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
 
 	// initialize domains
 	studentService := studentdomain.NewStudentService(studentdomain.NewSQLStudentRepository(db))
@@ -46,8 +55,8 @@ func main() {
 	// Setup routes
 	router := routes.SetupRoutes(handler)
 
-	fmt.Printf("Starting server on port %s\n", configuration.GetConfiguration().Server.HttpPort)
-	if err := http.ListenAndServe(configuration.GetConfiguration().Server.HttpPort, router); err != nil {
+	fmt.Printf("Starting server on port %s\n", appPort)
+	if err := http.ListenAndServe(appPort, router); err != nil {
 		log.Fatalf("Error starting server: %v\n", err)
 	}
 }

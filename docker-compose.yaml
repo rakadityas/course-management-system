@@ -11,9 +11,23 @@ services:
       MYSQL_USER: myuser
       MYSQL_PASSWORD: mypassword
     volumes:
-       - ./db:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "myuser:mypassword@tcp(db:3306)/course_management?parseTime=true"
+      APP_PORT: ":8991"
+    ports:
+      - "8991:8991"
 
 volumes:
   mysql_data:

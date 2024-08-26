@@ -1,8 +1,0 @@
-{
-    "Server": {
-        "HttpPort": ":8991"
-    },
-    "Resource": {
-        "PrimaryDatabase": "myuser:mypassword@tcp(localhost:3306)/course_management?parseTime=true"
-    }
-}
