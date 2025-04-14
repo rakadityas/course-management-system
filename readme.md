@@ -1,4 +1,5 @@
 # Course Management System
+for refreshing go complete with code structure and clean code.
 
 ## Tech Stack
 
