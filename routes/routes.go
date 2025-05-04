@@ -10,10 +10,11 @@ import (
 func SetupRoutes(handler *handlers.Handler) *mux.Router {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/signup", handler.CourseSignUpHandler()).Methods("POST")
-	r.HandleFunc("/courses", handler.ListCoursesHandler()).Methods("GET")
-	r.HandleFunc("/cancel", handler.CancelCourseHandler()).Methods("POST")
-	r.HandleFunc("/classmates", handler.ListClassmatesHandler()).Methods("GET")
+	// Course enrollment endpoints
+	r.HandleFunc("/v1/enrollments", handler.CourseSignUpHandler()).Methods("POST")
+	r.HandleFunc("/v1/students/{studentId}/courses", handler.ListCoursesHandler()).Methods("GET")
+	r.HandleFunc("/v1/enrollments", handler.CancelCourseHandler()).Methods("DELETE")
+	r.HandleFunc("/v1/students/{studentId}/classmates", handler.ListClassmatesHandler()).Methods("GET")
 
 	return r
 }

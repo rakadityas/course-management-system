@@ -1,5 +1,8 @@
 # Course Management System
-for refreshing go complete with code structure and clean code.
+
+A Go-based course management system with clean architecture and RESTful API design.
+
+for refreshing go skills.
 
 ## Tech Stack
 
@@ -7,55 +10,13 @@ for refreshing go complete with code structure and clean code.
 - **MySQL**: Database system for storing data.
 - **Docker**: Containerization tool used for hosting MySQL.
 
-## Directory Structure
+## Project Overview
 
-This project is structured based on Clean Architecture principles:
-
-- **`bin`**: Contains the compiled binary files.
-- **`cmd`**: Contains `main.go` file and entry point for the application.
-- **`domain`**: Contains core entities such as students, courses, and course enrollment.
-- **`etc`**: Contains plain configuration files.
-- **`handlers`**: Contains API handlers.
-- **`routes`**: Contains API route definitions.
-- **`scripts`**: Contains DDL and DML scripts for database queries.
-- **`use-case`**: Contains core business logic and use cases combining one or more domains.
-- **`Dockerfile`**: Dockerfile configuration for the app.
-- **`docker-compose.yaml`**: configuration for the app and mysql database.
-
-
-## Makefile Commands
-
-Once the dependencies are installed and configured, you can use the following commands to get started:
-
-### Build and Run the Application
-```
-make run
-```
-This command will:
-- Build the Go application and place the binary in the bin directory.
-- The app will run on port 8991 (configured in etc/development.json)
-- Run the binary with the specified configuration file.
-
-### Start Docker Containers
-```
-make compose-up
-```
-This command will:
-- Start the Docker containers defined in docker-compose.yml in detached mode.
-
-### Stop Docker Containers
-```
-make compose-down
-```
-This command will:
-- Stop the Docker containers defined in docker-compose.yml.
-
-### Building dockerfile
-```
-make compose-build:
-```
-This command will:
-- building the dockerfile
+This system manages course enrollments with features for students to:
+- Sign up for courses
+- View enrolled courses
+- Cancel course enrollments
+- View classmates in enrolled courses
 
 ## Entities
 
@@ -96,253 +57,83 @@ type CourseEnrollment struct {
 }
 ```
 
+## API Endpoints
 
+### Course Enrollment Management
 
-# API Documentation
-
-## Endpoints
-
-### 1. Sign Up for a Course
-**Endpoint:** `POST /signup`
-
-**Description:** Enroll a student in a course.
-
-**Request Payload:**
+#### Enroll in a Course
 ```
+POST /v1/enrollments
+Content-Type: application/json
+
+Request Body:
 {
-  "student_id": 123,
-  "course_id": 456
-}
-```
-- student_id (int64): ID of the student.
-- course_id (int64): ID of the course.
-
-
-**Response:**
-
-Success response
-```
-{
-  "status": "success",
-  "message": "Successfully enrolled",
-  "enrollment_data": {
-    "id": 1,
-    "student_id": 123,
-    "student_email": "student@example.com",
-    "course_id": 456,
-    "course_name": "Course Name",
-    "status": 1,
-    "create_time": "2024-08-25T12:34:56Z",
-    "update_time": "2024-08-25T12:34:56Z"
-  }
+    "studentId": <int>,
+    "courseId": <int>
 }
 ```
 
-Failed response: request empty
+#### List Enrolled Courses
 ```
+GET /v1/students/{studentId}/courses
+```
+
+#### Cancel Course Enrollment
+```
+DELETE /v1/enrollments
+Content-Type: application/json
+
+Request Body:
 {
-  "status": "failure",
-  "message": "Request Data is empty"
+    "studentId": <int>,
+    "courseId": <int>
 }
 ```
 
-Failed response: student not found
+#### List Classmates
 ```
-{
-  "status": "failure",
-  "message": "student data not found"
-}
+GET /v1/students/{studentId}/classmates
 ```
 
-Failed response: course not found
-```
-{
-  "status": "failure",
-  "message": "course data not found"
-}
-```
-
-Failed response: student has enrolled before
-```
-{
-  "status": "failure",
-  "message": "student has enrolled before"
-}
-```
-
-
-### 2. List Courses for a Student
-**Endpoint:** `GET /courses`
-
-**Description:** Retrieve a list of courses for a specific student.
-
-**Query Parameters:**
-- student_id (int64): ID of the student.
-
-**Response:**
-
-Success response
-```
-{
-  "status": "success",
-  "courses": [
-    {
-      "course_id": 456,
-      "course_name": "Course Name",
-      "status": 1,
-      "create_time": "2024-08-25T12:34:56Z",
-      "update_time": "2024-08-25T12:34:56Z"
-    }
-  ]
-}
-```
-
-Failure response: invalid student id
-```
-{
-  "status": "failure",
-  "message": "Invalid student ID"
-}
-```
-
-Failure response: Student ID Zero
-```
-{
-  "status": "failure",
-  "message": "Student ID Zero"
-}
-```
-
-Failed response: student not found
-```
-{
-  "status": "failure",
-  "message": "student data not found"
-}
-```
-
-Failure response: course data is not found
-```
-{
-  "status": "failure",
-  "message": "course data is not found for courseID: 10"
-}
-```
-
-
-
-### 3. Cancel a Course Enrollment
-**Endpoint:** `POST /cancel`
-
-**Description:** Cancel a student's enrollment in a course.
-
-**Request Payload:**
-```
-{
-  "student_id": 123,
-  "course_id": 456
-}
-```
-- student_id (int64): ID of the student.
-- course_id (int64): ID of the course.
-
-**Response:**
-
-Success response
-```
-{
-  "status": "success"
-}
-```
-
-Failure response: Invalid Request Payload (empty)
-```
-{
-  "status": "failure",
-  "message": "Invalid request payload (empty)"
-}
-```
-
-### 4. List Classmates
-**Endpoint:** `GET /classmates`
-
-**Description:** Get a list of classmates enrolled in the same courses as the given student.
-
-**Query Parameter:**
-- student_id (int64): ID of the student.
-
-**Response:**
-
-success response:
-```
-{
-  "status": "success",
-  "courses": [
-    {
-      "course_id": 101,
-      "course_name": "Course 101",
-      "class_mates": [
-        {
-          "student_id": "2",
-          "student_email": "student2@example.com"
-        },
-        {
-          "student_id": "3",
-          "student_email": "student3@example.com"
-        }
-      ]
-    }
-  ]
-}
+## Project Structure
 
 ```
-
-Failure response: Missing student_id
-```
-{
-  "status": "failure",
-  "message": "student_id is required"
-}
-```
-
-
-Failure response: Invalid student_id
-```
-{
-  "status": "failure",
-  "message": "Invalid student_id"
-}
+├── cmd/            # Application entry point
+├── common/         # Shared constants and utilities
+├── db/            # Database schemas and migrations
+├── domain/        # Business domain models and repositories
+├── handlers/      # HTTP request handlers
+├── routes/        # API route definitions
+├── use-case/      # Business logic implementation
+└── vendor/        # Dependencies (managed by Go modules)
 ```
 
+## Setup and Development
 
-Failure response: Invalid request payload (empty)
-```
-{
-  "status": "failure",
-  "message": "Invalid request payload (empty)"
-}
-```
+1. Clone the repository
+2. Install dependencies:
+   ```
+   go mod download
+   ```
+3. Set up the database:
+   ```
+   make migrate
+   ```
+4. Run the application:
+   ```
+   make run
+   ```
 
-Failed response: student not found
-```
-{
-  "status": "failure",
-  "message": "student data not found"
-}
-```
+## Testing
 
-Failure response: course data is not found
+Run tests with:
 ```
-{
-  "status": "failure",
-  "message": "course data is not found for courseID: 10"
-}
+go test ./...
 ```
 
-Failure response: student data is not found
+## Docker Support
+
+Build and run with Docker:
 ```
-{
-  "status": "failure",
-  "message": "student data is not found for studentID: 10"
-}
+docker-compose up --build
 ```
