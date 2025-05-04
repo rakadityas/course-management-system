@@ -108,32 +108,37 @@ GET /v1/students/{studentId}/classmates
 └── vendor/        # Dependencies (managed by Go modules)
 ```
 
-## Setup and Development
+## Makefile Commands
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   go mod download
-   ```
-3. Set up the database:
-   ```
-   make migrate
-   ```
-4. Run the application:
-   ```
-   make run
-   ```
+Once the dependencies are installed and configured, you can use the following commands to get started:
 
-## Testing
-
-Run tests with:
+### Build and Run the Application
 ```
-go test ./...
+make run
 ```
+This command will:
+- Build the Go application and place the binary in the bin directory.
+- The app will run on port 8991 (configured in etc/development.json)
+- Run the binary with the specified configuration file.
 
-## Docker Support
+### Start Docker Containers
+```
+make compose-up
+```
+This command will:
+- Start the Docker containers defined in docker-compose.yml in detached mode.
 
-Build and run with Docker:
+### Stop Docker Containers
 ```
-docker-compose up --build
+make compose-down
 ```
+This command will:
+- Stop the Docker containers defined in docker-compose.yml.
+
+### Building dockerfile
+```
+make compose-build:
+```
+This command will:
+- building the dockerfile
+
