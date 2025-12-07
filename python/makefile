@@ -6,6 +6,10 @@ export APP_PORT=:8992
 run:
 	python -m python.cmd.main
 
+# run tests
+test:
+	PYTHONPATH=.. pytest -q
+
 # building the dockerfile
 compose-build:
 	docker-compose build
