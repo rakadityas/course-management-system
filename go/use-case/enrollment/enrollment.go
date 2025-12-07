@@ -2,10 +2,10 @@ package enrollmentusecase
 
 import (
 	"context"
-	common "github/rakadityas/course-management-system/common"
-	courseDomain "github/rakadityas/course-management-system/domain/course"
-	courseEnrollmentDomain "github/rakadityas/course-management-system/domain/course-enrollment"
-	studentDomain "github/rakadityas/course-management-system/domain/student"
+	common "github/rakadityas/course-management-system/go/common"
+	courseDomain "github/rakadityas/course-management-system/go/domain/course"
+	courseEnrollmentDomain "github/rakadityas/course-management-system/go/domain/course-enrollment"
+	studentDomain "github/rakadityas/course-management-system/go/domain/student"
 	"strconv"
 )
 

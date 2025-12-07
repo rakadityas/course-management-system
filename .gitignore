@@ -1,5 +1,5 @@
 # Go specific
-vendor/
+go/vendor/
 *.exe
 *.exe~
 *.dll

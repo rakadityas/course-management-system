@@ -3,15 +3,15 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	coursedomain "github/rakadityas/course-management-system/domain/course"
-	courseenrollmentdomain "github/rakadityas/course-management-system/domain/course-enrollment"
-	studentdomain "github/rakadityas/course-management-system/domain/student"
+	coursedomain "github/rakadityas/course-management-system/go/domain/course"
+	courseenrollmentdomain "github/rakadityas/course-management-system/go/domain/course-enrollment"
+	studentdomain "github/rakadityas/course-management-system/go/domain/student"
 	"os"
 	"time"
 
-	handlers "github/rakadityas/course-management-system/handlers"
-	"github/rakadityas/course-management-system/routes"
-	enrollmentusecase "github/rakadityas/course-management-system/use-case/enrollment"
+	handlers "github/rakadityas/course-management-system/go/handlers"
+	"github/rakadityas/course-management-system/go/routes"
+	enrollmentusecase "github/rakadityas/course-management-system/go/use-case/enrollment"
 	"log"
 	"net/http"
 
