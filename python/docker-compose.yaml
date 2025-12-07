@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql_db_py
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: course_management
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    volumes:
+      - mysql_data_py:/var/lib/mysql
+      - ../go/db:/docker-entrypoint-initdb.d
+    ports:
+      - "3307:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python_app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "myuser:mypassword@tcp(db:3306)/course_management"
+      APP_PORT: ":8992"
+    ports:
+      - "8992:8992"
+
+volumes:
+  mysql_data_py:

@@ -1,0 +1,2 @@
+StatusSuccess = "success"
+StatusFailure = "failure"
