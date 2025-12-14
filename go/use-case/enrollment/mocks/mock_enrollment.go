@@ -6,7 +6,7 @@ package enrollmentusecase
 
 import (
 	context "context"
-	enrollmentusecase "github/rakadityas/course-management-system/go/use-case/enrollment"
+	enrollmentusecase "github.com/rakadityas/course-management-system/go/use-case/enrollment"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

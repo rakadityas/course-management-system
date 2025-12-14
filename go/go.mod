@@ -1,4 +1,4 @@
-module github/rakadityas/course-management-system
+module github.com/rakadityas/course-management-system/go
 
 go 1.20
 

@@ -4,19 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"github/rakadityas/course-management-system/go/common"
-	enrollmentUseCase "github/rakadityas/course-management-system/go/use-case/enrollment"
-	enrollmentUseCaseMock "github/rakadityas/course-management-system/go/use-case/enrollment/mocks"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/rakadityas/course-management-system/go/common"
+	enrollmentUseCase "github.com/rakadityas/course-management-system/go/use-case/enrollment"
+	enrollmentUseCaseMock "github.com/rakadityas/course-management-system/go/use-case/enrollment/mocks"
+
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 )
 
 func TestHandler_CourseSignUpHandler(t *testing.T) {
@@ -63,7 +63,7 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 				StudentID: studentID,
 				CourseID:  courseID,
 			},
-			wantStatusCode: http.StatusOK,
+			wantStatusCode: http.StatusCreated,
 			wantBody:       `{"status":"success","enrollment_data":{"id":1,"student_id":1,"student_email":"student@example.com","course_id":101,"course_name":"Course Name","status":1,"create_time":"0001-01-01T00:00:00Z","update_time":"0001-01-01T00:00:00Z"}}`,
 		},
 		{
@@ -76,7 +76,7 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Request Data is empty"}`,
+			wantBody:       `{"status":"failure","message":"Student ID and Course ID are required"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -86,7 +86,7 @@ func TestHandler_CourseSignUpHandler(t *testing.T) {
 			}
 
 			body, _ := json.Marshal(tt.requestPayload)
-			req := httptest.NewRequest(http.MethodPost, "/course-sign-up", bytes.NewReader(body))
+			req := httptest.NewRequest(http.MethodPost, "/v1/enrollments", bytes.NewReader(body))
 			rec := httptest.NewRecorder()
 
 			handler := h.CourseSignUpHandler()
@@ -162,7 +162,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				"student_id": "invalid",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Invalid student ID"}`,
+			wantBody:       `{"status":"failure","message":"Invalid student ID format"}`,
 		},
 		{
 			name: "Zero Student ID",
@@ -173,7 +173,7 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				"student_id": "0",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Student ID Zero"}`,
+			wantBody:       `{"status":"failure","message":"Invalid student ID"}`,
 		},
 		{
 			name: "Error From UseCase",
@@ -200,12 +200,11 @@ func TestHandler_ListCoursesHandler(t *testing.T) {
 				EnrollmentUseCase: tt.fields.EnrollmentUseCase,
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/list-courses", nil)
-			q := req.URL.Query()
-			for key, value := range tt.queryParams {
-				q.Add(key, value)
+			path := "/v1/students/{studentId}/courses"
+			req := httptest.NewRequest(http.MethodGet, path, nil)
+			if v, ok := tt.queryParams["student_id"]; ok {
+				req = mux.SetURLVars(req, map[string]string{"studentId": v})
 			}
-			req.URL.RawQuery = q.Encode()
 			rec := httptest.NewRecorder()
 
 			handler := h.ListCoursesHandler()
@@ -277,7 +276,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Invalid request payload (empty)"}`,
+			wantBody:       `{"status":"failure","message":"Student ID and Course ID are required"}`,
 		},
 		{
 			name: "Error From UseCase",
@@ -296,7 +295,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 				CourseID:  courseID,
 			},
 			wantStatusCode: http.StatusInternalServerError,
-			wantBody:       `{"status":"failure","message":"failed to cancel course"}`,
+			wantBody:       `{"status":"failure","message":"some error"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -306,7 +305,7 @@ func TestHandler_CancelCourseHandler(t *testing.T) {
 			}
 
 			body, _ := json.Marshal(tt.requestPayload)
-			req := httptest.NewRequest(http.MethodPost, "/cancel-course", bytes.NewReader(body))
+			req := httptest.NewRequest(http.MethodDelete, "/v1/enrollments", bytes.NewReader(body))
 			rec := httptest.NewRecorder()
 
 			handler := h.CancelCourseHandler()
@@ -401,7 +400,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 			},
 			queryParams:    map[string]string{},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"student_id is required"}`,
+			wantBody:       `{"status":"failure","message":"Invalid student ID format"}`,
 		},
 		{
 			name: "Invalid student_id",
@@ -412,7 +411,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": "invalid",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Invalid student_id"}`,
+			wantBody:       `{"status":"failure","message":"Invalid student ID format"}`,
 		},
 		{
 			name: "Student ID Zero",
@@ -423,7 +422,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": "0",
 			},
 			wantStatusCode: http.StatusBadRequest,
-			wantBody:       `{"status":"failure","message":"Invalid request payload (empty)"}`,
+			wantBody:       `{"status":"failure","message":"Invalid student ID"}`,
 		},
 		{
 			name: "Error from UseCase",
@@ -441,7 +440,7 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				"student_id": strconv.FormatInt(studentID, 10),
 			},
 			wantStatusCode: http.StatusInternalServerError,
-			wantBody:       `{"status":"failure","message":"failed to list classmates","courses": null}`,
+			wantBody:       `{"status":"failure","message":"some error"}`,
 		},
 	}
 
@@ -451,13 +450,10 @@ func TestHandler_ListClassmatesHandler(t *testing.T) {
 				EnrollmentUseCase: tt.fields.EnrollmentUseCase,
 			}
 
-			query := "?"
-			for key, value := range tt.queryParams {
-				query += fmt.Sprintf("%s=%s&", key, value)
+			req := httptest.NewRequest(http.MethodGet, "/v1/students/{studentId}/classmates", nil)
+			if v, ok := tt.queryParams["student_id"]; ok {
+				req = mux.SetURLVars(req, map[string]string{"studentId": v})
 			}
-			query = strings.TrimSuffix(query, "&")
-
-			req := httptest.NewRequest(http.MethodGet, "/list-classmates"+query, nil)
 			rec := httptest.NewRecorder()
 
 			handler := h.ListClassmatesHandler()

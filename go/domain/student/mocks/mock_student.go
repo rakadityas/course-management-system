@@ -6,7 +6,7 @@ package studentdomain
 
 import (
 	context "context"
-	student "github/rakadityas/course-management-system/go/domain/student"
+	student "github.com/rakadityas/course-management-system/go/domain/student"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

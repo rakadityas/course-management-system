@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	common "github/rakadityas/course-management-system/go/common"
-	enrollmentUseCase "github/rakadityas/course-management-system/go/use-case/enrollment"
+	common "github.com/rakadityas/course-management-system/go/common"
+	enrollmentUseCase "github.com/rakadityas/course-management-system/go/use-case/enrollment"
 
 	"github.com/gorilla/mux"
 )

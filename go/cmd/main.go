@@ -3,17 +3,19 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	coursedomain "github/rakadityas/course-management-system/go/domain/course"
-	courseenrollmentdomain "github/rakadityas/course-management-system/go/domain/course-enrollment"
-	studentdomain "github/rakadityas/course-management-system/go/domain/student"
 	"os"
 	"time"
 
-	handlers "github/rakadityas/course-management-system/go/handlers"
-	"github/rakadityas/course-management-system/go/routes"
-	enrollmentusecase "github/rakadityas/course-management-system/go/use-case/enrollment"
+	coursedomain "github.com/rakadityas/course-management-system/go/domain/course"
+	courseenrollmentdomain "github.com/rakadityas/course-management-system/go/domain/course-enrollment"
+	studentdomain "github.com/rakadityas/course-management-system/go/domain/student"
+
 	"log"
 	"net/http"
+
+	handlers "github.com/rakadityas/course-management-system/go/handlers"
+	"github.com/rakadityas/course-management-system/go/routes"
+	enrollmentusecase "github.com/rakadityas/course-management-system/go/use-case/enrollment"
 
 	_ "github.com/go-sql-driver/mysql"
 )

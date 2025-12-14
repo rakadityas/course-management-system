@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github/rakadityas/course-management-system/go/handlers"
+	"github.com/rakadityas/course-management-system/go/handlers"
 
 	"github.com/gorilla/mux"
 )
